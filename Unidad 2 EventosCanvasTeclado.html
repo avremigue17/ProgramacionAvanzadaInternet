@@ -27,8 +27,13 @@
 		<!-- <img id="pingu" src="burbujas.png"> -->
 	</div>
 	<script type="text/javascript">
+
 		var canvas = null, ctx = null,x=0,y=0;
 		var direccion;
+		var velocidad = 3;
+		var puntaje = 5;
+		var jugador = null, bloque = null; marcador=null;
+
 		window.requestAnimationFrame = (function(){
 			return window.requestAnimationFrame || 
 				window.mozRequestAnimationFrame ||
@@ -37,56 +42,113 @@
 					window.setTimeout(callback,17);
 				}
 		}());
+
+		function Etiqueta(x,y,c,v,t){
+			this.x=x;
+			this.y=y;
+			this.c=c;
+			this.v=v;
+			this.t=t;
+
+			this.paint =function(ctx){
+				ctx.fillStyle=this.c;
+				ctx.font = this.t;
+				ctx.fillText(this.v,this.x,this.y);
+			}
+		}
+
+		function Rectangle(x,y,w,h,c){
+			this.x=x;
+			this.y=y;
+			this.w=w;
+			this.h=h;
+			this.c=c;
+
+			this.paint =function(ctx){
+				ctx.fillStyle=this.c;
+				ctx.fillRect(this.x,this.y,this.w,this.h);
+			}
+
+			this.intersects = function(target){
+				if( this.x < target.x + target.w  && 
+					this.x + this.w > target.x    &&
+					this.y < target.y + target.h  &&
+					this.y + this.h > target.y){
+					return true;
+				}
+			}
+		}
+
 		function paint(ctx)
 		{
-			ctx.fillStyle = "#fff";
+			ctx.fillStyle = "#000";
 			ctx.fillRect(0,0,canvas.width,canvas.height);
-			ctx.fillStyle="red";
-			ctx.fillRect(x,y,10,10);
+
+			jugador.paint(ctx);
+			bloque.paint(ctx);
+			marcador.paint(ctx);
+
 		}
+
 		function upt(){
 			switch (direccion) {
 			  case 38:
-			    	y -=2;
-					if(y<0){
-						y = canvas.height;
+			    	jugador.y -=velocidad;
+					if(jugador.y<0){
+						jugador.y = canvas.height;
 					}
 			    break;
 			  case 40:
-			    	y += 2;
-					if(y>=canvas.height){
-					 	y = -10;
+			    	jugador.y +=velocidad;
+					if(jugador.y>=canvas.height){
+					 	jugador.y = -10;
 					}
 			    break;
 			  case 37:
-			    	x -= 2;
-					if (x<0) {
-						x = canvas.width;
+			    	jugador.x -=velocidad;
+					if (jugador.x<0) {
+						jugador.x = canvas.width;
 					}
 			    break;
 			  default:
-					x += 2;
-					if(x>canvas.width){
-						x = -10;
+					jugador.x +=velocidad;
+					if(jugador.x>canvas.width){
+						jugador.x = -10;
 					}
 			    break;
 			}
+
+			if (jugador.intersects(bloque)) {
+				bloque.x = random(canvas.width-10);
+				bloque.y = random(canvas.height-10);
+				marcador.v += puntaje;
+			}
 		}
-		//se repite mucho
+
 		function run(){
 			window.requestAnimationFrame(run)
 			upt();
 			paint(ctx);
 		}
+
 		function init(){
 			canvas = document.getElementById('canvas');
 			ctx = canvas.getContext('2d');
+
+			jugador = new Rectangle(x,y,10,10,"cyan")
+			bloque = new Rectangle((canvas.width/2-10),(canvas.height/2-10),10,10,"yellow")
+			marcador = new Etiqueta((canvas.width/2-10),25,"white",0,"30px Arial")
 			run();
 		}
+		
 		window.addEventListener('load',init,false);  
 		document.addEventListener('keydown',function(e){
 			direccion = e.keyCode;
 		})
+
+		function random(x){
+			return Math.floor(Math.random()*x)
+		}
 		 
 	</script>
 </body>
