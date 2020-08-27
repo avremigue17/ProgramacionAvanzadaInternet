@@ -33,6 +33,7 @@
 		var velocidad = 3;
 		var puntaje = 5;
 		var jugador = null, bloque = null; marcador=null;
+		var pausado = false;
 
 		window.requestAnimationFrame = (function(){
 			return window.requestAnimationFrame || 
@@ -87,30 +88,42 @@
 			jugador.paint(ctx);
 			bloque.paint(ctx);
 			marcador.paint(ctx);
-
+			if(pausado){
+			    pause.v="Juego Pausado"
+			}else{
+				pause.v=""
+			}
+			pause.paint(ctx);
 		}
 
 		function upt(){
 			switch (direccion) {
 			  case 38:
+			        pausado=false;
 			    	jugador.y -=velocidad;
 					if(jugador.y<0){
 						jugador.y = canvas.height;
 					}
 			    break;
 			  case 40:
+			  		pausado=false;
 			    	jugador.y +=velocidad;
 					if(jugador.y>=canvas.height){
 					 	jugador.y = -10;
 					}
 			    break;
 			  case 37:
+			  		pausado=false;
 			    	jugador.x -=velocidad;
 					if (jugador.x<0) {
 						jugador.x = canvas.width;
 					}
 			    break;
+			    case 32:
+			    	pausado=true;
+			    break;
 			  default:
+			  		pausado=false;
 					jugador.x +=velocidad;
 					if(jugador.x>canvas.width){
 						jugador.x = -10;
@@ -138,6 +151,7 @@
 			jugador = new Rectangle(x,y,10,10,"cyan")
 			bloque = new Rectangle((canvas.width/2-10),(canvas.height/2-10),10,10,"yellow")
 			marcador = new Etiqueta((canvas.width/2-10),25,"white",0,"30px Arial")
+			pause = new Etiqueta((canvas.width/2-90),290,"white","","30px Arial")
 			run();
 		}
 		
