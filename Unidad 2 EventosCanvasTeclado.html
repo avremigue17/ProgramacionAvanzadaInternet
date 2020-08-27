@@ -34,6 +34,7 @@
 		var puntaje = 5;
 		var jugador = null, bloque = null; marcador=null;
 		var pausado = false;
+		var paredes = Array();
 
 		window.requestAnimationFrame = (function(){
 			return window.requestAnimationFrame || 
@@ -94,6 +95,10 @@
 				pause.v=""
 			}
 			pause.paint(ctx);
+			for (var i = paredes.length - 1; i >= 0; i--) {
+				paredes[i].paint(ctx);
+			}
+
 		}
 
 		function upt(){
@@ -136,6 +141,12 @@
 				bloque.y = random(canvas.height-10);
 				marcador.v += puntaje;
 			}
+
+			for (var i = paredes.length - 1; i >= 0; i--) {
+				if (jugador.intersects(paredes[i])) {
+					console.log("choque");
+				}
+			}
 		}
 
 		function run(){
@@ -148,10 +159,14 @@
 			canvas = document.getElementById('canvas');
 			ctx = canvas.getContext('2d');
 
-			jugador = new Rectangle(x,y,10,10,"cyan")
-			bloque = new Rectangle((canvas.width/2-10),(canvas.height/2-10),10,10,"yellow")
-			marcador = new Etiqueta((canvas.width/2-10),25,"white",0,"30px Arial")
-			pause = new Etiqueta((canvas.width/2-90),290,"white","","30px Arial")
+			jugador = new Rectangle(x,y,10,10,"cyan");
+			bloque = new Rectangle((canvas.width/2-10),(canvas.height/2-10),10,10,"yellow");
+			marcador = new Etiqueta((canvas.width/2-10),25,"white",0,"30px Arial");
+			pause = new Etiqueta((canvas.width/2-90),290,"white","","30px Arial");
+			paredes.push(new Rectangle(100,100,10,10,"white"));
+			paredes.push(new Rectangle(100,200,10,10,"white"));
+			paredes.push(new Rectangle(200,100,10,10,"white"));
+			paredes.push(new Rectangle(200,200,10,10,"white"));
 			run();
 		}
 		
