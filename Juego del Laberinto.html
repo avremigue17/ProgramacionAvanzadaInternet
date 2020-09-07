@@ -10,16 +10,13 @@
 			background-color: gray;
 			min-height: 200px;
 			margin-left: 550px;
-			box-shadow: 0 0 40px purple;
+			box-shadow: 0 0 40px #03f;
 		} 
 		canvas{
 			background-color:black;
 			width: 100%;
 			height: 100%;
 		}
-		/*img{
-			visibility: hidden;
-		}*/
 	</style>
 </head>
 <body style="background-image: url(fondo3.jpg);background-size: 100% 700px;">
@@ -27,7 +24,6 @@
 		<canvas id="canvas" width="403" height="360">
 			Opps tu navegador no soporta CANVAS
 		</canvas>
-		<!-- <img id="pingu" src="burbujas.png"> -->
 	</div>
 	<script type="text/javascript">
 		var canvas = null, ctx = null,x=5,y=285;
@@ -95,12 +91,11 @@
 
 		function paint(ctx)
 		{
-			//ctx.fillStyle = "white";
 			ctx.drawImage(fondo,0,0);
-			//ctx.fillRect(0,0,canvas.width,canvas.height);
 			ctx.drawImage(fantasmita,fantasma.x,fantasma.y);
 			ctx.drawImage(playerBody,jugador.x,jugador.y);
 			ctx.drawImage(manzana,bloque.x,bloque.y);
+
 			if(over==true){
 			    pause.v="Fin del Juego"
 			}else{
@@ -108,11 +103,11 @@
 			    pause.v="Juego Pausado"
 				}else{
 				pause.v=""
-			}
-
+				}
 			}
 
 			pause.paint(ctx);
+
 			for (var i = paredes.length - 1; i >= 0; i--) {
 				paredes[i].paint(ctx);
 			}
@@ -143,8 +138,7 @@
 				}
 			}
 			
-			if(over==false)
-			{
+			if(over==false){
 				if(p!=true){
 					if(correr==true){
 						if(choque==false){
@@ -191,18 +185,17 @@
 							    break;
 							}
 						}
-						
 					}
-					
 				}
 
-				if (jugador.intersects(bloque)) {
+				if (jugador.intersects(bloque)){
 					over=true;
 					musica.muted = true;
 					ganar.play();
 					ganar2.play();
 				}
-				for (var i = paredes.length - 1; i >= 0; i--) {
+
+				for (var i = paredes.length - 1; i >= 0; i--){
 					if (jugador.intersects(paredes[i])) {
 						choque=true;
 						switch(direccion){
@@ -221,15 +214,17 @@
 						}
 					}
 				}
-				for (var i = fantasma.length - 1; i >= 0; i--) {
+
+				for (var i = fantasma.length - 1; i >= 0; i--){
 					if (jugador.intersects(fantasma[i])) {
 						over=true;
 						musica.muted = true;
 						gameover.play();
 					}
 				}
-				for (var i = paredes.length - 1; i >= 0; i--) {
-					for (var j = fantasma.length - 1; j >= 0; j--) {
+
+				for (var i = paredes.length - 1; i >= 0; i--){
+					for (var j = fantasma.length - 1; j >= 0; j--){
 						if (fantasma[j].intersects(paredes[i])) {
 							switch(fantasma[j].a){
 								case 0:
@@ -249,8 +244,6 @@
 									fantasma[j].y+=1;
 								break;
 							}
-							//fantasma[j].a=Math.round(Math.random()*3);
-							//console.log(direccionfantasma)
 						}
 					}
 				}
@@ -274,7 +267,6 @@
 			bloque = new Rectangle((385),(104),20,20,"yellow");
 			marcador = new Etiqueta((canvas.width/2-10),25,"white",0,"30px Arial");
 			pause = new Etiqueta((168),(155),"yellow","","13px Arial");
-			//fantasma.push(new Rectangle((80),(105),13,13,"yellow"));
 
 			fondo.src="piso.jpg"
 			playerBody.src="mario1.png";
@@ -286,6 +278,7 @@
 			musica.src="ghost.mp3";
 			pausa.src="pause.mp3";
 			gameover.src="over.mp3";
+
 			//Fantasmas
 			fantasma.push(new Rectangle((5),(5),12,12,"yellow"));
 			fantasma.push(new Rectangle((380),(5),12,12,"yellow"));
@@ -303,11 +296,13 @@
 			fantasma.push(new Rectangle((60),(305),12,12,"yellow"));
 			fantasma.push(new Rectangle((5),(140),12,12,"yellow"));
 			fantasma.push(new Rectangle((80),(150),12,12,"yellow"));
+
 			//Orillas
 			paredes.push(new Rectangle(0,0,3,357,"white"));
 			paredes.push(new Rectangle(0,0,400,3,"white"));
 			paredes.push(new Rectangle(0,357,403,3,"white"));
 			paredes.push(new Rectangle(400,0,3,357,"white"));
+
 			//interior
 			paredes.push(new Rectangle(20,0,3,40,"white"));
 			paredes.push(new Rectangle(60,0,3,40,"white"));
@@ -500,6 +495,7 @@
 				}
 			}
 		})
+
 		document.addEventListener('keyup',function(e){
 			correr=false;
 			choque=false;
@@ -522,7 +518,6 @@
 		function NumerosAleatorios(min, max) {
 		   return Math.round(Math.random() * (max - min) + min);
 		}
-		 
 	</script>
 </body>
 </html>
