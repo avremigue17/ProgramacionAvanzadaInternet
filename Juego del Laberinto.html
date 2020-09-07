@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>
+		Canvas
+	</title>
+	<style type="text/css">
+		.container{
+			width: 55%;
+			background-color: gray;
+			min-height: 200px;
+			margin-left: 550px;
+			box-shadow: 0 0 40px purple;
+		} 
+		canvas{
+			background-color:black;
+			width: 100%;
+			height: 100%;
+		}
+		/*img{
+			visibility: hidden;
+		}*/
+	</style>
+</head>
+<body style="background-image: url(fondo3.jpg);background-size: 100% 700px;">
+	<div class="container">
+		<canvas id="canvas" width="403" height="360">
+			Opps tu navegador no soporta CANVAS
+		</canvas>
+		<!-- <img id="pingu" src="burbujas.png"> -->
+	</div>
+	<script type="text/javascript">
+		var canvas = null, ctx = null,x=5,y=285;
+		var direccion;
+		var direccionfantasma;
+		var puntaje = 5;
+		var jugador = null, bloque = null; marcador=null; 
+		var fantasma = Array();
+		var pausado = false;
+		var paredes = Array();
+		var over=false;
+		var p=false;
+		var correr=false;
+		var cambio=false;
+		var choque=false;
+		var playerBody = new Image(), manzana = new Image(); fantasmita = new Image();
+		var fondo = new Image();
+		var musica=new Audio(), gameover=new Audio(), pausa=new Audio(), ganar=new Audio(), ganar2=new Audio();
+
+		window.requestAnimationFrame = (function(){
+			return window.requestAnimationFrame || 
+				window.mozRequestAnimationFrame ||
+				window.webkitRequestAnimationFrame ||
+				function (callback){
+					window.setTimeout(callback,-500);
+				}
+		}());
+
+		function Etiqueta(x,y,c,v,t){
+			this.x=x;
+			this.y=y;
+			this.c=c;
+			this.v=v;
+			this.t=t;
+
+			this.paint =function(ctx){
+				ctx.fillStyle=this.c;
+				ctx.font = this.t;
+				ctx.fillText(this.v,this.x,this.y);
+			}
+		}
+
+		function Rectangle(x,y,w,h,c,a){
+			this.x=x;
+			this.y=y;
+			this.w=w;
+			this.h=h;
+			this.c=c;
+			this.a=0;
+
+			this.paint =function(ctx){
+				ctx.fillStyle=this.c;
+				ctx.fillRect(this.x,this.y,this.w,this.h);
+			}
+
+			this.intersects = function(target){
+				if( this.x < target.x + target.w  && 
+					this.x + this.w > target.x    &&
+					this.y < target.y + target.h  &&
+					this.y + this.h > target.y){
+					return true;
+				}
+			}
+		}
+
+		function paint(ctx)
+		{
+			//ctx.fillStyle = "white";
+			ctx.drawImage(fondo,0,0);
+			//ctx.fillRect(0,0,canvas.width,canvas.height);
+			ctx.drawImage(fantasmita,fantasma.x,fantasma.y);
+			ctx.drawImage(playerBody,jugador.x,jugador.y);
+			ctx.drawImage(manzana,bloque.x,bloque.y);
+			if(over==true){
+			    pause.v="Fin del Juego"
+			}else{
+				if(p){
+			    pause.v="Juego Pausado"
+				}else{
+				pause.v=""
+			}
+
+			}
+
+			pause.paint(ctx);
+			for (var i = paredes.length - 1; i >= 0; i--) {
+				paredes[i].paint(ctx);
+			}
+			for (var i = fantasma.length - 1; i >= 0; i--) {
+				ctx.drawImage(fantasmita,fantasma[i].x,fantasma[i].y);
+			}
+		}
+
+		function upt(){
+			if(over==false){
+				if(p==false){
+					for (var i = fantasma.length - 1; i >= 0; i--) {
+						switch(fantasma[i].a){
+							case 0:
+								fantasma[i].x+=.5
+							break;
+							case 1:
+								fantasma[i].x-=.5
+							break;
+							case 2:
+								fantasma[i].y+=.5
+							break;
+							case 3:
+								fantasma[i].y-=.5
+							break;
+						}
+					}
+				}
+			}
+			
+			if(over==false)
+			{
+				if(p!=true){
+					if(correr==true){
+						if(choque==false){
+							switch (direccion) {
+							 	case 38:
+							  		if(cambio==false){
+									playerBody.src="mario7.png";
+									cambio=true;
+									}else{
+										playerBody.src="mario8.png";
+										cambio=false;
+									}
+							    	jugador.y -=1.5;
+							    break;
+							  	case 40:
+							  		if(cambio==false){
+									playerBody.src="mario5.png";
+									cambio=true;
+									}else{
+										playerBody.src="mario6.png";
+										cambio=false;
+									}
+							    	jugador.y +=1.5;
+							    break;
+							  	case 37:
+							  		if(cambio==false){
+									playerBody.src="mario3.png";
+									cambio=true;
+									}else{
+										playerBody.src="mario4.png";
+										cambio=false;
+									}
+							    	jugador.x -=1.5;
+							    break;
+							  	case 39:
+							  		if(cambio==false){
+									playerBody.src="mario1.png";
+									cambio=true;
+									}else{
+										playerBody.src="mario2.png";
+										cambio=false;
+									}
+									jugador.x +=1.5;
+							    break;
+							}
+						}
+						
+					}
+					
+				}
+
+				if (jugador.intersects(bloque)) {
+					over=true;
+					musica.muted = true;
+					ganar.play();
+					ganar2.play();
+				}
+				for (var i = paredes.length - 1; i >= 0; i--) {
+					if (jugador.intersects(paredes[i])) {
+						choque=true;
+						switch(direccion){
+							case 37:
+							jugador.x=jugador.x+1;
+							break;
+							case 38:
+							jugador.y=jugador.y+1;
+							break;
+							case 39:
+							jugador.x=jugador.x-2;
+							break;
+							case 40:
+							jugador.y=jugador.y-1;
+							break;
+						}
+					}
+				}
+				for (var i = fantasma.length - 1; i >= 0; i--) {
+					if (jugador.intersects(fantasma[i])) {
+						over=true;
+						musica.muted = true;
+						gameover.play();
+					}
+				}
+				for (var i = paredes.length - 1; i >= 0; i--) {
+					for (var j = fantasma.length - 1; j >= 0; j--) {
+						if (fantasma[j].intersects(paredes[i])) {
+							switch(fantasma[j].a){
+								case 0:
+									fantasma[j].a= NumerosAleatorios(2, 3);
+									fantasma[j].x-=1;
+								break;
+								case 1:
+									fantasma[j].a= NumerosAleatorios(2, 3);
+									fantasma[j].x+=3;
+								break;
+								case 2:
+									fantasma[j].a= NumerosAleatorios(0, 1);
+									fantasma[j].y-=1;
+								break;
+								case 3:
+									fantasma[j].a= NumerosAleatorios(0, 1);
+									fantasma[j].y+=1;
+								break;
+							}
+							//fantasma[j].a=Math.round(Math.random()*3);
+							//console.log(direccionfantasma)
+						}
+					}
+				}
+			}else{
+				setTimeout("location.reload()",4000);
+			}
+		}
+
+		function run(){
+			window.requestAnimationFrame(run)
+			upt();
+			paint(ctx);
+			musica.play();
+		}
+
+		function init(){
+			canvas = document.getElementById('canvas');
+			ctx = canvas.getContext('2d');
+
+			jugador = new Rectangle(x,y,13.3,13.3,"cyan");
+			bloque = new Rectangle((385),(104),20,20,"yellow");
+			marcador = new Etiqueta((canvas.width/2-10),25,"white",0,"30px Arial");
+			pause = new Etiqueta((168),(155),"yellow","","13px Arial");
+			//fantasma.push(new Rectangle((80),(105),13,13,"yellow"));
+
+			fondo.src="piso.jpg"
+			playerBody.src="mario1.png";
+			manzana.src="puerta.png";
+			fantasmita.src="fantasma1.png"
+
+			ganar.src="ganar.mp3"
+			ganar2.src="ganar2.mp3"
+			musica.src="ghost.mp3";
+			pausa.src="pause.mp3";
+			gameover.src="over.mp3";
+			//Fantasmas
+			fantasma.push(new Rectangle((5),(5),12,12,"yellow"));
+			fantasma.push(new Rectangle((380),(5),12,12,"yellow"));
+			fantasma.push(new Rectangle((20),(340),12,12,"yellow"));
+			fantasma.push(new Rectangle((360),(340),12,12,"yellow"));
+			fantasma.push(new Rectangle((260),(110),12,12,"yellow"));
+			fantasma.push(new Rectangle((160),(105),12,12,"yellow"));
+			fantasma.push(new Rectangle((260),(200),12,12,"yellow"));
+			fantasma.push(new Rectangle((160),(200),12,12,"yellow"));
+			fantasma.push(new Rectangle((160),(5),12,12,"yellow"));
+			fantasma.push(new Rectangle((200),(340),12,12,"yellow"));
+			fantasma.push(new Rectangle((260),(200),12,12,"yellow"));
+			fantasma.push(new Rectangle((120),(140),12,12,"yellow"));
+			fantasma.push(new Rectangle((260),(150),12,12,"yellow"));
+			fantasma.push(new Rectangle((60),(305),12,12,"yellow"));
+			fantasma.push(new Rectangle((5),(140),12,12,"yellow"));
+			fantasma.push(new Rectangle((80),(150),12,12,"yellow"));
+			//Orillas
+			paredes.push(new Rectangle(0,0,3,357,"white"));
+			paredes.push(new Rectangle(0,0,400,3,"white"));
+			paredes.push(new Rectangle(0,357,403,3,"white"));
+			paredes.push(new Rectangle(400,0,3,357,"white"));
+			//interior
+			paredes.push(new Rectangle(20,0,3,40,"white"));
+			paredes.push(new Rectangle(60,0,3,40,"white"));
+			paredes.push(new Rectangle(40,20,3,40,"white"));
+			paredes.push(new Rectangle(60,20,42,3,"white"));
+			paredes.push(new Rectangle(100,20,3,20,"white"));
+			paredes.push(new Rectangle(120,0,3,20,"white"));
+			paredes.push(new Rectangle(100,40,40,3,"white"));
+			paredes.push(new Rectangle(140,20,3,120,"white"));
+			paredes.push(new Rectangle(160,20,3,40,"white"));
+			paredes.push(new Rectangle(180,0,3,40,"white"));
+			paredes.push(new Rectangle(200,20,3,40,"white"));
+			paredes.push(new Rectangle(220,0,3,40,"white"));
+			paredes.push(new Rectangle(220,20,40,3,"white"));
+			paredes.push(new Rectangle(280,20,3,20,"white"));
+			paredes.push(new Rectangle(300,0,3,20,"white"));
+			paredes.push(new Rectangle(320,20,3,20,"white"));
+			paredes.push(new Rectangle(340,0,3,100,"white"));
+			paredes.push(new Rectangle(360,20,40,3,"white"));
+			paredes.push(new Rectangle(0,60,120,3,"white"));
+			paredes.push(new Rectangle(80,40,3,60,"white"));
+			paredes.push(new Rectangle(160,60,60,3,"white"));
+			paredes.push(new Rectangle(220,60,3,20,"white"));
+			paredes.push(new Rectangle(220,80,20,3,"white"));
+			paredes.push(new Rectangle(240,40,3,43,"white"));
+			paredes.push(new Rectangle(240,40,83,3,"white"));
+			paredes.push(new Rectangle(360,40,20,3,"white"));
+			paredes.push(new Rectangle(0,100,40,3,"white"));
+			paredes.push(new Rectangle(20,80,40,3,"white"));
+			paredes.push(new Rectangle(60,80,3,80,"white"));
+			paredes.push(new Rectangle(80,100,40,3,"white"));
+			paredes.push(new Rectangle(100,80,40,3,"white"));
+			paredes.push(new Rectangle(160,80,40,3,"white"));
+			paredes.push(new Rectangle(160,80,3,20,"white"));
+			paredes.push(new Rectangle(160,100,20,3,"white"));
+			paredes.push(new Rectangle(200,80,3,40,"white"));
+			paredes.push(new Rectangle(200,100,60,3,"white"));
+			paredes.push(new Rectangle(260,60,3,43,"white"));
+			paredes.push(new Rectangle(260,60,20,3,"white"));
+			paredes.push(new Rectangle(280,60,3,60,"white"));
+			paredes.push(new Rectangle(300,40,3,60,"white"));
+			paredes.push(new Rectangle(320,60,40,3,"white"));
+			paredes.push(new Rectangle(300,80,20,3,"white"));
+			paredes.push(new Rectangle(300,100,20,3,"white"));
+			paredes.push(new Rectangle(380,40,3,40,"white"));
+			paredes.push(new Rectangle(360,80,23,3,"white"));
+			paredes.push(new Rectangle(360,80,3,40,"white"));
+			paredes.push(new Rectangle(360,100,40,3,"white"));
+			paredes.push(new Rectangle(20,120,3,20,"white"));
+			paredes.push(new Rectangle(20,120,80,3,"white"));
+			paredes.push(new Rectangle(40,140,3,40,"white"));
+			paredes.push(new Rectangle(60,140,20,3,"white"));
+			paredes.push(new Rectangle(120,100,3,20,"white"));
+			paredes.push(new Rectangle(100,120,3,120,"white"));
+			paredes.push(new Rectangle(140,120,40,3,"white"));
+			paredes.push(new Rectangle(180,120,3,20,"white"));
+			paredes.push(new Rectangle(160,140,80,3,"white"));
+			paredes.push(new Rectangle(200,120,60,3,"white"));
+			paredes.push(new Rectangle(280,120,20,3,"white"));
+			paredes.push(new Rectangle(260,120,3,80,"white"));
+			paredes.push(new Rectangle(260,140,40,3,"white"));
+			paredes.push(new Rectangle(320,100,3,80,"white"));
+			paredes.push(new Rectangle(340,120,23,3,"white"));
+			paredes.push(new Rectangle(340,120,3,80,"white"));
+			paredes.push(new Rectangle(320,180,23,3,"white"));
+			paredes.push(new Rectangle(20,183,3,40,"white"));
+			paredes.push(new Rectangle(20,180,60,3,"white"));
+			paredes.push(new Rectangle(80,160,3,23,"white"));
+			paredes.push(new Rectangle(100,140,20,3,"white"));
+			paredes.push(new Rectangle(100,160,20,3,"white"));
+			paredes.push(new Rectangle(100,180,40,3,"white"));
+			paredes.push(new Rectangle(140,163,3,40,"white"));
+			paredes.push(new Rectangle(140,160,20,3,"white"));
+			paredes.push(new Rectangle(160,140,3,23,"white"));
+			paredes.push(new Rectangle(380,120,20,3,"white"));
+			paredes.push(new Rectangle(380,120,3,120,"white"));
+			paredes.push(new Rectangle(360,140,20,3,"white"));
+			paredes.push(new Rectangle(360,140,3,20,"white"));
+			paredes.push(new Rectangle(340,200,20,3,"white"));
+			paredes.push(new Rectangle(360,180,3,43,"white"));
+			paredes.push(new Rectangle(140,200,20,3,"white"));
+			paredes.push(new Rectangle(160,180,20,3,"white"));
+			paredes.push(new Rectangle(180,160,3,100,"white"));
+			paredes.push(new Rectangle(180,160,60,3,"white"));
+			paredes.push(new Rectangle(240,160,3,20,"white"));
+			paredes.push(new Rectangle(280,160,40,3,"white"));
+			paredes.push(new Rectangle(260,180,40,3,"white"));
+			paredes.push(new Rectangle(300,180,3,60,"white"));
+			paredes.push(new Rectangle(300,200,20,3,"white"));
+			paredes.push(new Rectangle(320,200,3,20,"white"));
+			paredes.push(new Rectangle(320,220,20,3,"white"));
+			paredes.push(new Rectangle(340,220,3,60,"white"));
+			paredes.push(new Rectangle(340,240,43,3,"white"));
+			paredes.push(new Rectangle(0,160,20,3,"white"));
+			paredes.push(new Rectangle(20,240,3,43,"white"));
+			paredes.push(new Rectangle(20,240,60,3,"white"));
+			paredes.push(new Rectangle(40,200,3,40,"white"));
+			paredes.push(new Rectangle(60,180,3,40,"white"));
+			paredes.push(new Rectangle(80,200,3,60,"white"));
+			paredes.push(new Rectangle(100,240,23,3,"white"));
+			paredes.push(new Rectangle(120,200,3,40,"white"));
+			paredes.push(new Rectangle(120,220,80,3,"white"));
+			paredes.push(new Rectangle(200,180,20,3,"white"));
+			paredes.push(new Rectangle(200,180,3,20,"white"));
+			paredes.push(new Rectangle(220,180,3,40,"white"));
+			paredes.push(new Rectangle(220,220,60,3,"white"));
+			paredes.push(new Rectangle(240,200,23,3,"white"));
+			paredes.push(new Rectangle(280,200,3,23,"white"));
+			paredes.push(new Rectangle(200,220,3,20,"white"));
+			paredes.push(new Rectangle(200,240,40,3,"white"));
+			paredes.push(new Rectangle(240,240,3,20,"white"));
+			paredes.push(new Rectangle(260,220,3,60,"white"));
+			paredes.push(new Rectangle(280,240,23,3,"white"));
+			paredes.push(new Rectangle(280,240,3,20,"white"));
+			paredes.push(new Rectangle(0,220,20,3,"white"));
+			paredes.push(new Rectangle(40,260,3,80,"white"));
+			paredes.push(new Rectangle(40,260,20,3,"white"));
+			paredes.push(new Rectangle(60,260,3,20,"white"));
+			paredes.push(new Rectangle(60,280,20,3,"white"));
+			paredes.push(new Rectangle(80,280,3,20,"white"));
+			paredes.push(new Rectangle(60,300,23,3,"white"));
+			paredes.push(new Rectangle(0,280,20,3,"white"));
+			paredes.push(new Rectangle(0,300,20,3,"white"));
+			paredes.push(new Rectangle(0,340,20,3,"white"));
+			paredes.push(new Rectangle(20,320,20,3,"white"));
+			paredes.push(new Rectangle(60,320,60,3,"white"));
+			paredes.push(new Rectangle(40,340,60,3,"white"));
+			paredes.push(new Rectangle(80,260,60,3,"white"));
+			paredes.push(new Rectangle(140,240,3,23,"white"));
+			paredes.push(new Rectangle(160,240,3,40,"white"));
+			paredes.push(new Rectangle(120,280,80,3,"white"));
+			paredes.push(new Rectangle(100,260,3,40,"white"));
+			paredes.push(new Rectangle(100,340,3,20,"white"));
+			paredes.push(new Rectangle(120,280,3,60,"white"));
+			paredes.push(new Rectangle(140,300,20,3,"white"));
+			paredes.push(new Rectangle(140,300,3,60,"white"));
+			paredes.push(new Rectangle(160,300,3,40,"white"));
+			paredes.push(new Rectangle(160,340,20,3,"white"));
+			paredes.push(new Rectangle(180,340,3,20,"white"));
+			paredes.push(new Rectangle(180,280,3,40,"white"));
+			paredes.push(new Rectangle(180,320,20,3,"white"));
+			paredes.push(new Rectangle(200,300,3,40,"white"));
+			paredes.push(new Rectangle(180,260,20,3,"white"));
+			paredes.push(new Rectangle(220,260,23,3,"white"));
+			paredes.push(new Rectangle(220,260,3,40,"white"));
+			paredes.push(new Rectangle(200,300,23,3,"white"));
+			paredes.push(new Rectangle(220,320,3,20,"white"));
+			paredes.push(new Rectangle(220,320,40,3,"white"));
+			paredes.push(new Rectangle(240,280,3,40,"white"));
+			paredes.push(new Rectangle(240,280,60,3,"white"));
+			paredes.push(new Rectangle(240,280,60,3,"white"));
+			paredes.push(new Rectangle(240,340,40,3,"white"));
+			paredes.push(new Rectangle(260,300,20,3,"white"));
+			paredes.push(new Rectangle(280,300,3,60,"white"));
+			paredes.push(new Rectangle(280,320,20,3,"white"));
+			paredes.push(new Rectangle(300,260,3,40,"white"));
+			paredes.push(new Rectangle(300,260,20,3,"white"));
+			paredes.push(new Rectangle(320,240,3,23,"white"));
+			paredes.push(new Rectangle(300,300,40,3,"white"));
+			paredes.push(new Rectangle(320,300,3,40,"white"));
+			paredes.push(new Rectangle(300,340,23,3,"white"));
+			paredes.push(new Rectangle(320,340,20,3,"white"));
+			paredes.push(new Rectangle(320,280,60,3,"white"));
+			paredes.push(new Rectangle(360,280,3,60,"white"));
+			paredes.push(new Rectangle(340,320,40,3,"white"));
+			paredes.push(new Rectangle(380,340,20,3,"white"));
+			paredes.push(new Rectangle(380,300,20,3,"white"));
+			paredes.push(new Rectangle(360,260,40,3,"white"));
+			run();
+		}
+		
+		window.addEventListener('load',init,false);  
+		document.addEventListener('keydown',function(e){
+			correr=true;
+			if(e.keyCode==32){
+				pausa.pause();
+				pausa.currentTime=0;
+				pausa.play();
+				if(p==true){
+					p=false;
+					direccion=0;
+				}else{
+					p=true;
+				}
+			}else{
+				if(p==false){
+					if(e.keyCode==37||e.keyCode==38||e.keyCode==39||e.keyCode==40 ){
+						direccion = e.keyCode;
+					}
+				}
+			}
+		})
+		document.addEventListener('keyup',function(e){
+			correr=false;
+			choque=false;
+			switch (direccion) {
+			 	case 38:
+			    	playerBody.src="mario7.png";
+			    break;
+			  	case 40:
+			    	playerBody.src="mario5.png";
+			    break;
+			  	case 37:
+			  		playerBody.src="mario3.png";
+			    break;
+			  	case 39:
+			  		playerBody.src="mario1.png";
+			    break;
+			}
+		})
+
+		function NumerosAleatorios(min, max) {
+		   return Math.round(Math.random() * (max - min) + min);
+		}
+		 
+	</script>
+</body>
+</html>
