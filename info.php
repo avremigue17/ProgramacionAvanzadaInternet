@@ -1,6 +1,4 @@
 <?php
-	if(isset($_POST['year']) && $_POST['year']!=""){
-		$edad = 2020 - $_POST['year'];
+		$edad = $_POST['primero'] + $_POST['segundo'];
 		echo $edad;
-	}
 ?>
